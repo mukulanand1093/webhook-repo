@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub Webhook Feed</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .card { background: #f4f4f4; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h2>GitHub Webhook Events</h2>
+  <div id="events"></div>
+
+  <script>
+    function fetchEvents() {
+      fetch("/events")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("events");
+          container.innerHTML = "";
+          data.reverse().forEach(evt => {
+            let msg = "";
+            if (evt.event_type === "push")
+              msg = `${evt.author} pushed to ${evt.to_branch} on ${new Date(evt.timestamp).toUTCString()}`;
+            else if (evt.event_type === "pull_request")
+              msg = `${evt.author} submitted a pull request from ${evt.from_branch} to ${evt.to_branch} on ${new Date(evt.timestamp).toUTCString()}`;
+            else if (evt.event_type === "merge")
+              msg = `${evt.author} merged branch ${evt.from_branch} to ${evt.to_branch} on ${new Date(evt.timestamp).toUTCString()}`;
+            container.innerHTML += `<div class="card">${msg}</div>`;
+          });
+        });
+    }
+
+    fetchEvents();
+    setInterval(fetchEvents, 15000);
+  </script>
+</body>
+</html>
